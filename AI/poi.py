@@ -1,6 +1,13 @@
 import numpy as np
 import cv2
 import mobese
+import datetime
+from openpyxl import Workbook
+kitap = Workbook() 
+kitap.create_sheet("veriler") 
+yaz = kitap.get_sheet_by_name("veriler") 
+yaz.append(['Label','Count','Xcoordinate','Ycoordinate','Date-Time']) 
+
 
 url = mobese.secili()
 confidenceThreshold = 0.5
@@ -19,8 +26,13 @@ video_capture = cv2.VideoCapture(url)
 
 
 while True:
+
     ret, frame = video_capture.read()
     frame = cv2.flip(frame, 1)
+    hebele = 0
+    car = 0
+    motorbike = 0
+    handbag = 0
     if W is None or H is None:
         (H,W) = frame.shape[:2]
 
@@ -47,22 +59,42 @@ while True:
                 confidences.append(float(confidence))
                 classIDs.append(classID)
 
-    #Apply Non Maxima Suppression
     detectionNMS = cv2.dnn.NMSBoxes(boxes, confidences, confidenceThreshold, NMSThreshold)
     if(len(detectionNMS) > 0):
         for i in detectionNMS.flatten():
             (x, y) = (boxes[i][0], boxes[i][1])
             (w, h) = (boxes[i][2], boxes[i][3])
+            if(labels[classIDs[i]] == "person" ):
+            	hebele+=1
+            	yaz.append(['person',hebele,x,y,datetime.datetime.now()]) 
+            	print(x,y)
+            	print("Tespit Edilen İnsan Sayısı Anlık : " , str(hebele))
+            	kitap.save("veriler.xlsx") # exceli kaydet
+            if(labels[classIDs[i]] == "car" ):
+            	car+=1
+            	yaz.append(['car',car,x,y,datetime.datetime.now()]) 
+            	print(x,y)
+            	print("Tespit Edilen Araba Sayısı Anlık : " , str(hebele))
+            	kitap.save("veriler.xlsx") # exceli kaydet
+            if(labels[classIDs[i]] == "motorbike" ):
+            	motorbike+=1
+            	yaz.append(['motorbike',car,x,y,datetime.datetime.now()]) 
+            	print(x,y)
+            	print("Tespit Edilen motor Sayısı Anlık : " , str(hebele))
+            	kitap.save("veriler.xlsx") # exceli kaydet
+
 
             color = [int(c) for c in COLORS[classIDs[i]]]
             cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
             text = '{}: {:.4f}'.format(labels[classIDs[i]], confidences[i])
             cv2.putText(frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-    cv2.imshow('Output', frame)
-    if(cv2.waitKey(1) & 0xFF == ord('q')):
-        break
 
-#Finally when video capture is over, release the video capture and destroyAllWindows
+
+    cv2.imshow('sonuc', frame)
+    if(cv2.waitKey(1) & 0xFF == ord('q')):
+    	break
+
+kitap.close() #excelli kapat
 video_capture.release()
 cv2.destroyAllWindows()
