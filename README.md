@@ -5,3 +5,6 @@ Uygulamayı çalıştırabilmeniz için ai klasörünün içerisine aşağıdaki
 https://pjreddie.com/media/files/yolov3.weights
 
 http://www.enisgetmez.com/blog/istanbulu-izliyorum-gozlerim-kapali/
+
+https://instagram.com/enisgetmez
+enis@enisgetmez.com
